@@ -1,3 +1,4 @@
+import { useActionState } from "react";
 import {
   hasMinLength,
   isEmail,
@@ -6,7 +7,7 @@ import {
 } from "../util/validation.js";
 
 export default function Signup() {
-  const signupAction = (formData) => {
+  function signupAction(prevFormState, formData) {
     const email = formData.get("email");
     const password = formData.get("password");
     const confirmPassword = formData.get("confirm-password");
@@ -39,7 +40,17 @@ export default function Signup() {
     if (acquisitionChannel.length === 0) {
       errors.push("Please select at least 1 acquisition channel");
     }
-  };
+
+    if (errors.length > 0) {
+      return { errors };
+    }
+
+    return { errors: null };
+  }
+
+  const [formState, formAction] = useActionState(signupAction, {
+    errors: null,
+  });
 
   return (
     <form action={signupAction}>
@@ -126,6 +137,14 @@ export default function Signup() {
           agree to the terms and conditions
         </label>
       </div>
+
+      {formState.errors && (
+        <ul className="errors">
+          {formState.errors.map((error) => (
+            <li key={error}>{error}</li>
+          ))}
+        </ul>
+      )}
 
       <p className="form-actions">
         <button type="reset" className="button button-flat">
